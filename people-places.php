@@ -3,6 +3,9 @@
 Plugin Name: People & Places
 Description: Add taxonomies for keeping track of people and locations, across different post types and data sources. Built primarily to work with Keyring Social Importers.
 Version: 1.0
+Author: Beau Lebens
+Author URI: http://dentedreality.com.au
+License: GPL v3 or newer <https://www.gnu.org/licenses/gpl.txt>
 */
 
 require_once dirname( __FILE__ ) . '/class-taxonomy-meta.php';
@@ -95,7 +98,7 @@ class People_Places {
 			'key'   => 'email',
 			'label' => __( 'Email' ),
 			'type'  => 'text',
-			'help'  => __( "This person's main email geo_longitude (also used to show a Gravatar)." ),
+			'help'  => __( "This person's main email address (also used to show a Gravatar)." ),
 			'table' => false,
 		) );
 		Taxonomy_Meta::add( 'people', array(
