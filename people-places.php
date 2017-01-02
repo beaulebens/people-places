@@ -108,27 +108,6 @@ class People_Places {
 			'help'  => __( "If they have one, what is this person's website/URL?" ),
 			'table' => false,
 		) );
-		Taxonomy_Meta::add( 'people', array(
-			'key'   => 'twitter',
-			'label' => __( 'Twitter screen name' ),
-			'type'  => 'text',
-			'help'  => __( "This person's Twitter screen/user name (without the '@')." ),
-			'table' => true,
-		) );
-		Taxonomy_Meta::add( 'people', array(
-			'key'   => 'instagram',
-			'label' => __( 'Instagram username' ),
-			'type'  => 'text',
-			'help'  => __( "This person's Instagram username." ),
-			'table' => true,
-		) );
-		Taxonomy_Meta::add( 'people', array(
-			'key'   => 'foursquare',
-			'label' => __( 'Foursquare id' ),
-			'type'  => 'text',
-			'help'  => __( "This person's Foursquare id." ),
-			'table' => false,
-		) );
 	}
 
 	/**
@@ -160,42 +139,6 @@ class People_Places {
 	 */
 	static function get_url( $term_id ) {
 		return get_term_meta( $term_id, 'people-url', true );
-	}
-
-	/**
-	 * Get the full URL to the Twitter profile page for someone, based on their term_id
-	 * @param  Int $term_id The id for this person's term entry
-	 * @return String URL to their Twitter profile, or empty string if none.
-	 */
-	static function get_twitter_url( $term_id ) {
-		if ( $user = get_term_meta( $term_id, 'people-twitter', true ) ) {
-			$user = 'https://twitter.com/' . $user;
-		}
-		return $user;
-	}
-
-	/**
-	 * Get the full URL to the Instagram profile page for someone, based on their term_id
-	 * @param  Int $term_id The id for this person's term entry
-	 * @return String URL to their Instagram profile, or empty string if none.
-	 */
-	static function get_instagram_url( $term_id ) {
-		if ( $user = get_term_meta( $term_id, 'people-instagram', true ) ) {
-			$user = 'https://instagram.com/' . $user;
-		}
-		return $user;
-	}
-
-	/**
-	 * Get the full URL to the Foursquare profile page for someone, based on their term_id
-	 * @param  Int $term_id The id for this person's term entry
-	 * @return String URL to their Foursquare profile, or empty string if none.
-	 */
-	static function get_foursquare_url( $term_id ) {
-		if ( $user = get_term_meta( $term_id, 'people-foursquare', true ) ) {
-			$user = 'https://foursquare.com/user/' . $user; // have to use this format because we don't always have username
-		}
-		return $user;
 	}
 
 	/**
@@ -247,6 +190,13 @@ class People_Places {
 	 */
 	function register_places_meta() {
 		Taxonomy_Meta::add( 'places', array(
+			'key'   => 'address',
+			'label' => __( 'Street Address' ),
+			'type'  => 'text',
+			'help'  => __( "Full street address, including city, state etc." ),
+			'table' => false,
+		) );
+		Taxonomy_Meta::add( 'places', array(
 			'key'   => 'geo_latitude',
 			'label' => __( 'Latitude' ),
 			'type'  => 'text',
@@ -258,27 +208,6 @@ class People_Places {
 			'label' => __( 'Longitude' ),
 			'type'  => 'text',
 			'help'  => __( "The longitude (in decimal notation) for this location." ),
-			'table' => false,
-		) );
-		Taxonomy_Meta::add( 'places', array(
-			'key'   => 'address',
-			'label' => __( 'Street Address' ),
-			'type'  => 'text',
-			'help'  => __( "Full street address, including city, state etc." ),
-			'table' => false,
-		) );
-		Taxonomy_Meta::add( 'places', array(
-			'key'   => 'foursquare',
-			'label' => __( 'Foursquare Venue id' ),
-			'type'  => 'text',
-			'help'  => __( "Unique identifier from Foursquare (md5-looking hash)." ),
-			'table' => false,
-		) );
-		Taxonomy_Meta::add( 'places', array(
-			'key'   => 'twitter',
-			'label' => __( 'Twitter Location id' ),
-			'type'  => 'text',
-			'help'  => __( "Unique identifier from Twitter, for this location." ),
 			'table' => false,
 		) );
 	}
