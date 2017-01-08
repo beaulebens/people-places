@@ -210,6 +210,40 @@ class People_Places {
 			'help'  => __( "The longitude (in decimal notation) for this location." ),
 			'table' => false,
 		) );
+
+		// Add a very basic map to the taxonomy detail page
+		add_action( 'places_edit_form_fields', function( $term, $taxonomy ) {
+			$lat  = get_term_meta( $term->term_id, 'places-geo_latitude', true );
+			$long = get_term_meta( $term->term_id, 'places-geo_longitude', true );
+
+			if ( ! empty( $lat ) && ! empty( $long ) ) {
+				?><tr>
+					<th><?php _e( 'Map of location' ); ?></th>
+					<td>
+						<div id="osmmapdiv" style="width:400px; height:400px;"></div>
+						<p class="description"><?php _e( 'Based on latitide/longitude.' ); ?></p>
+					</td>
+				</tr>
+  <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <script>
+	jQuery( document ).ready( function(){
+    map = new OpenLayers.Map( 'osmmapdiv' );
+    map.addLayer( new OpenLayers.Layer.OSM() );
+
+    var lonLat = new OpenLayers.LonLat( <?php echo $long; ?>, <?php echo $lat; ?> )
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            map.getProjectionObject() // to Spherical Mercator Projection
+          );
+    var zoom = 15;
+    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    map.addLayer( markers );
+    markers.addMarker( new OpenLayers.Marker( lonLat ) );
+    map.setCenter( lonLat, zoom );
+	});
+  </script><?php
+			}
+		}, 11, 2 );
 	}
 
 	/**
