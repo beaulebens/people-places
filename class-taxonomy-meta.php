@@ -116,7 +116,7 @@ class Taxonomy_Meta {
 			default:
 				?><tr class="form-field">
 					<th scope="row">
-						<label for="<?php echo $id;  ?>"><?php esc_html_e( $args['label'] ); ?></label>
+						<label for="<?php echo $id; ?>"><?php esc_html_e( $args['label'] ); ?></label>
 					</th>
 					<td>
 						<input type="text" name="<?php echo $id;  ?>" id="<?php echo $id;  ?>" value="<?php esc_attr_e( $args['value'] ); ?>" />
