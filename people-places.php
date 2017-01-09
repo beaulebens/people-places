@@ -17,6 +17,36 @@ class People_Places {
 
 		add_action( 'restrict_manage_posts', array( $this, 'post_list_filter_people' ) );
 		add_action( 'restrict_manage_posts', array( $this, 'post_list_filter_places' ) );
+
+		add_filter( 'bulk_actions-edit-people', array( $this, 'bulk_actions_merge' ) );
+		add_filter( 'bulk_actions-edit-places', array( $this, 'bulk_actions_merge' ) );
+
+		add_action( 'load-edit-tags.php', array( $this, 'handle_merge_terms' ) );
+		add_action( 'load-edit-tags.php', array( $this, 'handle_merge_terms' ) );
+
+		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+	}
+
+	function admin_notices() {
+		if ( isset( $_GET['merged'] ) ) {
+			$tax = get_current_screen();
+			$tax = $tax->taxonomy;
+
+			?><div class="updated">
+				<p><?php printf(
+					__( 'Those terms have been merged. <a href="%s">Edit merged term?</a>' ),
+					esc_url(
+						add_query_arg(
+							array(
+								'taxonomy' => $tax,
+								'tag_ID'   => (int) $_GET['merged']
+							),
+							admin_url( 'term.php' )
+						)
+					)
+				); ?></p>
+			</div><?php
+		}
 	}
 
 	/**
@@ -45,6 +75,150 @@ class People_Places {
 		<?php endforeach; ?>
 		</select><?php
 		endif;
+	}
+
+	/**
+	 * Add a "Merge" option to the Bulk Actions list on People/Places taxonomy pages.
+	 */
+	function bulk_actions_merge( $actions ) {
+		$actions['merge'] = __( 'Merge' );
+		return $actions;
+	}
+
+	/**
+	 * Handle actually merging the data from multiple People/Places into one.
+	 */
+	function handle_merge_terms() {
+		// Only care about POST requests
+		if ( ! isset( $_POST ) ) {
+			return;
+		}
+		$data = array_merge(
+			array( 'action' => '', 'action2' => '', 'taxonomy' => '' ),
+			$_POST
+		);
+
+		// Only care about our own "action"
+		if ( empty( $data['action'] ) && empty( $data['action2'] ) ) {
+			return;
+		}
+		if ( 'merge' !== $data['action'] && 'merge' !== $data['action2'] ) {
+			return;
+		}
+
+		// Need at least 2 terms selected
+		if ( empty( $data['delete_tags'] ) || 2 > count( $data['delete_tags'] ) ) {
+			return;
+		}
+
+		// If this somehow gets triggered for a taxonomy we don't know about, bail
+		if ( ! in_array( $data['taxonomy'], array( 'people', 'places' ) ) ) {
+			return;
+		}
+
+		$tax = get_taxonomy( $data['taxonomy'] );
+		if ( !$tax ) {
+			return;
+		}
+
+		if ( ! current_user_can( $tax->cap->manage_terms ) ) {
+			return;
+		}
+
+		// Query details for all selected terms
+		$terms = get_terms( array(
+			'taxonomy' => $data['taxonomy'],
+			'include'  => $data['delete_tags']
+		) );
+		if ( ! $terms ) {
+			return;
+		}
+
+		// Find the shortest slug, which will be our destination term
+		$destination = false;
+		$sources = array();
+		foreach ( $terms as $term ) {
+			if ( ! $destination || strlen( $destination->slug ) > strlen( $term->slug ) ) {
+				if ( $destination ) {
+					$sources[] = $destination; // out with the old
+				}
+				$destination = $term;
+			} else {
+				$sources[] = $term;
+			}
+		}
+
+		// For all source terms...
+		foreach ( $sources as $term ) {
+			// Get (all) meta and attempt to merge it onto destination
+			$meta = get_term_meta( $term->term_id );
+			foreach ( $meta as $key => $value ) {
+				// See if the destination already has this meta
+				$existing = get_term_meta( $destination->term_id, $key, true );
+				if ( $existing && strlen( $existing ) > strlen( $value[0] ) ) {
+					// If there's already a value for this key, and it's longer than
+					// the one we have, then assume that one should stay. Bigger is better?
+					continue;
+				}
+				update_term_meta( $destination->term_id, $key, $value[0] );
+			}
+
+			// If this source term has a longer name, keep it
+			if ( strlen( $term->name ) > strlen( $destination->name ) ) {
+				wp_update_term(
+					$destination->term_id,
+					$data['taxonomy'],
+					array(
+						'name' => $term->name
+					)
+				);
+			}
+
+			// If this source term has a longer description, keep it
+			if ( strlen( $term->description ) > strlen( $destination->description ) ) {
+				wp_update_term(
+					$destination->term_id,
+					$data['taxonomy'],
+					array(
+						'description' => $term->description
+					)
+				);
+			}
+
+			// Migrate any associated posts onto the destination term
+			$delete = wp_delete_term(
+				$term->term_id,
+				$data['taxonomy'],
+				array(
+					'default'       => $destination->term_id,
+					'force_default' => true // Neat trick from https://wordpress.org/plugins/term-management-tools/
+				)
+			);
+			if ( is_wp_error( $delete ) ) {
+				continue;
+			}
+		}
+
+		// Redirect to the single view for the destination term
+		// _wp_http_referer
+		$paged = 0;
+		if ( ! empty( $data['_wp_http_referer'] ) ) {
+			parse_str( $data['_wp_http_referer'], $bits );
+			if ( ! empty( $bits['paged'] ) ) {
+				$paged = $bits['paged'];
+			}
+		}
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'taxonomy' => $data['taxonomy'],
+					'paged'    => $paged,
+					'merged'   => $destination->term_id
+				),
+				admin_url( 'edit-tags.php' )
+			)
+		);
+		exit;
 	}
 
 	/**
@@ -273,8 +447,19 @@ class People_Places {
  			$existing = $existing[0]->term_id;
  		} else {
  			// Create new entry to attach this data to
- 			// @todo Handle duplicate names when we find people on different networks (auto-merge?)
- 			$existing = wp_insert_term( $data['name'], 'people' );
+ 			$data['taxonomy'] = 'people'; // Required for wp_unique_term_slug() below
+ 			$existing = wp_insert_term(
+				$data['name'],
+				'people',
+				array(
+					'slug' => wp_unique_term_slug(
+						sanitize_title_with_dashes(
+							$data['name']
+						),
+						(object) $data
+					)
+				)
+			);
  			if ( $existing && ! is_wp_error( $existing ) ) {
  				$existing = $existing['term_id'];
 
@@ -287,7 +472,7 @@ class People_Places {
  			return false;
  		}
 
- 		return wp_set_object_terms( $post_id, array( intval( $existing ) ),'people', true );
+ 		return wp_set_object_terms( $post_id, array( intval( $existing ) ), 'people', true );
  	}
 
 	static function add_place_to_post( $meta, $value, $data, $post_id ) {
@@ -332,9 +517,20 @@ class People_Places {
 
 		// Create new entry to attach this data to if we haven't found one
 		if ( ! $existing ) {
-			// @todo handle duplicate names of places (e.g. Costco)
-			// We don't match very well since coordinates are likely to be different, even for the same place.
-			$inserted = wp_insert_term( $data['name'], 'places' );
+			// Create a new entry, likely with duplicates based on names
+			$data['taxonomy'] = 'places'; // Required for wp_unique_term_slug() below
+			$inserted = wp_insert_term(
+				$data['name'],
+				'places',
+				array(
+					'slug' => wp_unique_term_slug(
+						sanitize_title_with_dashes(
+							$data['name']
+						),
+						(object) $data
+					)
+				)
+			);
 			if ( $inserted && ! is_wp_error( $inserted ) ) {
 				$existing = $inserted['term_id'];
 			}
