@@ -226,23 +226,30 @@ class People_Places {
 	 */
 	function register_people_taxonomy() {
 		$labels = [
-		'name'              => _x( 'People', 'taxonomy general name' ),
-		'singular_name'     => _x( 'Person', 'taxonomy singular name' ),
-		'search_items'      => __( 'Search People' ),
-		'all_items'         => __( 'All People' ),
-		'edit_item'         => __( 'Edit Person' ),
-		'update_item'       => __( 'Update Person' ),
-		'add_new_item'      => __( 'Add New Person' ),
-		'new_item_name'     => __( 'New Person' ),
-		'menu_name'         => __( 'People' ),
+			'name'                       => _x( 'People', 'taxonomy general name' ),
+			'singular_name'              => _x( 'Person', 'taxonomy singular name' ),
+			'search_items'               => __( 'Search People' ),
+			'popular_items'              => __( 'Popular People' ),
+			'all_items'                  => __( 'All People' ),
+			'edit_item'                  => __( 'Edit Person' ),
+			'view_item'                  => __( 'View Person' ),
+			'update_item'                => __( 'Update Person' ),
+			'add_new_item'               => __( 'Add New Person' ),
+			'new_item_name'              => __( 'New Person' ),
+			'separate_items_with_commas' => __( 'Separate people with commas' ),
+			'add_or_remove_items'        => __( 'Add or remove people' ),
+			'choose_from_most_used'      => __( 'Choose from the most mentioned people' ),
+			'not_found'                  => __( 'No people found' ),
+			'no_terms'                   => __( 'No people' ),
+			'menu_name'                  => __( 'People' ),
 		];
 		$args = [
-		'hierarchical'      => false,
-		'labels'            => $labels,
-		'show_ui'           => true,
-		'show_admin_column' => true,
-		'query_var'         => true,
-		'rewrite'           => [ 'slug' => 'people' ],
+			'hierarchical'      => false,
+			'labels'            => $labels,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'rewrite'           => [ 'slug' => 'people' ],
 		];
 		register_taxonomy( 'people', ['post'], $args );
 
@@ -321,23 +328,30 @@ class People_Places {
 	 */
 	function register_places_taxonomy() {
 		$labels = [
-		'name'              => _x( 'Places', 'taxonomy general name' ),
-		'singular_name'     => _x( 'Place', 'taxonomy singular name' ),
-		'search_items'      => __( 'Search Places' ),
-		'all_items'         => __( 'All Places' ),
-		'edit_item'         => __( 'Edit Place' ),
-		'update_item'       => __( 'Update Place' ),
-		'add_new_item'      => __( 'Add New Place' ),
-		'new_item_name'     => __( 'New Place' ),
-		'menu_name'         => __( 'Places' ),
+			'name'                       => _x( 'Places', 'taxonomy general name' ),
+			'singular_name'              => _x( 'Place', 'taxonomy singular name' ),
+			'search_items'               => __( 'Search Places' ),
+			'popular_items'              => __( 'Popular Places' ),
+			'all_items'                  => __( 'All Places' ),
+			'edit_item'                  => __( 'Edit Place' ),
+			'view_item'                  => __( 'View Place' ),
+			'update_item'                => __( 'Update Place' ),
+			'add_new_item'               => __( 'Add New Place' ),
+			'new_item_name'              => __( 'New Place' ),
+			'separate_items_with_commas' => __( 'Separate places with commas' ),
+			'add_or_remove_items'        => __( 'Add or remove places' ),
+			'choose_from_most_used'      => __( 'Choose from the most mentioned places' ),
+			'not_found'                  => __( 'No places found' ),
+			'no_terms'                   => __( 'No places' ),
+			'menu_name'                  => __( 'Places' ),
 		];
 		$args = [
-		'hierarchical'      => false,
-		'labels'            => $labels,
-		'show_ui'           => true,
-		'show_admin_column' => true,
-		'query_var'         => true,
-		'rewrite'           => [ 'slug' => 'places' ],
+			'hierarchical'      => false,
+			'labels'            => $labels,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'rewrite'           => [ 'slug' => 'places' ],
 		];
 		register_taxonomy( 'places', ['post'], $args );
 
