@@ -420,13 +420,13 @@ class People_Places {
     map = new OpenLayers.Map( 'osmmapdiv' );
     map.addLayer( new OpenLayers.Layer.OSM() );
 
-    var lonLat = new OpenLayers.LonLat( <?php echo $long; ?>, <?php echo $lat; ?> )
+    var lonLat = new OpenLayers.LonLat( <?php esc_attr_e( $long ); ?>, <?php esc_attr_e( $lat ); ?> )
           .transform(
-            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            new OpenLayers.Projection( 'EPSG:4326' ), // transform from WGS 1984
             map.getProjectionObject() // to Spherical Mercator Projection
           );
     var zoom = 15;
-    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    var markers = new OpenLayers.Layer.Markers( 'Markers' );
     map.addLayer( markers );
     markers.addMarker( new OpenLayers.Marker( lonLat ) );
     map.setCenter( lonLat, zoom );
@@ -491,6 +491,13 @@ class People_Places {
  		return wp_set_object_terms( $post_id, array( intval( $existing ) ), 'people', true );
  	}
 
+	/**
+	 * Associate a Place with a Post.
+	 * @param String $meta    The slug of the taxonomy. Creates an identifier for meta.
+	 * @param Mixed $value    Either an int or a string. Unique identifier for this Place.
+	 * @param Array $data     Additional data for this Place. Keys can be `name`, `address`, `geo_latitude` and `geo_longitude`.
+	 * @param Int $post_id    The post id to associate this Place with.
+	 */
 	static function add_place_to_post( $meta, $value, $data, $post_id ) {
 		$existing = false;
 		// Resolve to existing entry?
@@ -566,7 +573,7 @@ class People_Places {
 			add_term_meta( $existing, 'places-geo_longitude', $data['geo_longitude'], true );
 		}
 
-		return wp_set_object_terms( $post_id, array( intval( $existing ) ), 'places' );
+		return wp_set_object_terms( $post_id, array( intval( $existing ) ), 'places', true );
 	}
 }
 
