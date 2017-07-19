@@ -414,7 +414,7 @@ class People_Places {
 						<p class="description"><?php _e( 'Based on latitide/longitude.' ); ?></p>
 					</td>
 				</tr>
-  <script src="//www.openlayers.org/api/OpenLayers.js"></script>
+  <script src="https://www.openlayers.org/api/OpenLayers.js"></script>
   <script>
 	jQuery( document ).ready( function(){
     map = new OpenLayers.Map( 'osmmapdiv' );
