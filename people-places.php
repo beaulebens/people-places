@@ -410,28 +410,56 @@ class People_Places {
 				?><tr>
 					<th><?php _e( 'Map of location' ); ?></th>
 					<td>
-						<div id="osmmapdiv" style="width:400px; height:400px;"></div>
+						<div id="osmmapdiv" style="width:100%; height:400px;"></div>
 						<p class="description"><?php _e( 'Based on latitide/longitude.' ); ?></p>
 					</td>
 				</tr>
-  <script src="https://www.openlayers.org/api/OpenLayers.js"></script>
-  <script>
-	jQuery( document ).ready( function(){
-    map = new OpenLayers.Map( 'osmmapdiv' );
-    map.addLayer( new OpenLayers.Layer.OSM() );
+				<script src="https://openlayers.org/en/v4.3.2/build/ol.js"></script>
+				<script>
+				jQuery( document ).ready( function(){
 
-    var lonLat = new OpenLayers.LonLat( <?php esc_attr_e( $long ); ?>, <?php esc_attr_e( $lat ); ?> )
-          .transform(
-            new OpenLayers.Projection( 'EPSG:4326' ), // transform from WGS 1984
-            map.getProjectionObject() // to Spherical Mercator Projection
-          );
-    var zoom = 15;
-    var markers = new OpenLayers.Layer.Markers( 'Markers' );
-    map.addLayer( markers );
-    markers.addMarker( new OpenLayers.Marker( lonLat ) );
-    map.setCenter( lonLat, zoom );
-	});
-  </script><?php
+					var iconStyle = new ol.style.Style({
+						image: new ol.style.Circle({
+							radius: 10,
+							snapToPixel: false,
+							fill: new ol.style.Fill({
+								color: [66, 113, 174, 0.7]
+							}),
+							stroke: new ol.style.Stroke({
+								color: [0, 0, 0, 1],
+								width: 2
+							})
+						})
+					});
+
+					var iconFeature = new ol.Feature({
+						geometry: new ol.geom.Point(ol.proj.fromLonLat([ <?php esc_attr_e( $long ); ?>, <?php esc_attr_e( $lat ); ?> ]))
+					});
+					iconFeature.setStyle( iconStyle );
+
+					var vectorLayer = new ol.layer.Vector({
+						source: new ol.source.Vector({
+							features: [ iconFeature ]
+						})
+					});
+
+					var tileLayer = new ol.layer.Tile({
+						source: new ol.source.OSM()
+					});
+
+					var map = new ol.Map({
+						target: 'osmmapdiv',
+						layers: [
+							tileLayer,
+							vectorLayer
+						],
+						view: new ol.View({
+							center: ol.proj.fromLonLat( [ <?php esc_attr_e( $long ); ?>, <?php esc_attr_e( $lat ); ?> ] ),
+							zoom: 16
+						})
+					});
+				});
+				</script><?php
 			}
 		}, 11, 2 );
 	}
