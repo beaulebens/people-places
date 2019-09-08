@@ -414,7 +414,7 @@ class People_Places {
 						<p class="description"><?php _e( 'Based on latitide/longitude.' ); ?></p>
 					</td>
 				</tr>
-				<script src="https://openlayers.org/en/v4.3.2/build/ol.js"></script>
+				<script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
 				<script>
 				jQuery( document ).ready( function(){
 
